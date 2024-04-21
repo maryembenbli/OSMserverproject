@@ -1,6 +1,10 @@
 package com.ftp.osmserverproj.Controller;
 import com.ftp.osmserverproj.Config.GateeFile;
+import com.ftp.osmserverproj.Model.Group;
 import com.ftp.osmserverproj.Model.Product;
+import com.ftp.osmserverproj.Model.Profil;
+import com.ftp.osmserverproj.Repository.GroupRepository;
+import com.ftp.osmserverproj.Repository.ProfileRepository;
 import com.ftp.osmserverproj.Service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +15,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -23,6 +28,11 @@ public class MyRestController {
     public MyRestController(GateeFile gateFile) {
         this.gateFile = gateFile;
     }
+//    @GetMapping("/login")
+//    public String login() {
+//        return "login";
+//    }
+
 
   /*  @GetMapping("/getFiles")
     public String getFiles() {
@@ -48,7 +58,7 @@ public class MyRestController {
         return response.toString();
     }*/
 
-      @Autowired
+     /* @Autowired
        private ProductService productService;
       @PostMapping("/uploadFiles")
        public String uploadFiles() {
@@ -157,13 +167,7 @@ public class MyRestController {
                            productService.createProduct(product);
                            response.append("Inserted values: ").append(line).append("\n");
                        } else {
-                           response.append("Invalid number of values in line: ").append(line).append("\n")
-                                   .append(values[0].getClass().getSimpleName()+"\n"+values[1].getClass().getSimpleName()
-                                           +"\n"+values[2].getClass().getSimpleName()+"\n"+values[3].getClass().getSimpleName()
-                                           +"\n"+values[4].getClass().getSimpleName()+"\n"+values[5].getClass().getSimpleName()
-                                           +"\n"+values[6].getClass().getSimpleName()+"\n"+values[7].getClass().getSimpleName()
-                                           +"\n"+values[8].getClass().getSimpleName()+"\n"+values[9].getClass().getSimpleName()
-                                           +"\n"+values[10].getClass().getSimpleName()+"\n");
+                           response.append("Invalid number of values in line: ").append(line).append("\n");
                        }
 
                    }
@@ -174,7 +178,7 @@ public class MyRestController {
                }
            }
            return response.toString();
-       }
+       }*/
    /* @Autowired
     private ProductService productService;
     @PostMapping("/uploadFiles")
@@ -316,6 +320,50 @@ public class MyRestController {
         }
         return response.toString();
     }*/
+
+
+    //profilcontroller
+
+    /*@Autowired
+    private ProfileRepository profileRepository;
+
+    @GetMapping("/profile/{profileId}/groups")
+    public ResponseEntity<?> getGroupsByProfileId(@PathVariable Long profileId) {
+        Optional<Profil> profileOptional = profileRepository.findById(profileId);
+        if (profileOptional.isPresent()) {
+            Profil profile = profileOptional.get();
+            Set<Group> groups = profile.getGroups();
+            return ResponseEntity.ok(groups);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }*/
+
+    @Autowired
+    private ProfileRepository profilRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfilesAndGroups() {
+        List<Profil> profiles = profilRepository.findAll();
+        List<Group> groups = groupRepository.findAll();
+
+        Map<Long, String> groupIdToNameMap = groups.stream()
+                .collect(Collectors.toMap(Group::getId, Group::getNameG));
+
+        List<Map<String, String>> result = new ArrayList<>();
+        profiles.forEach(profile -> {
+            Map<String, String> map = new HashMap<>();
+            map.put("profileId", String.valueOf(profile.getId()));
+            map.put("profileTitre", profile.getTitre());
+            map.put("groupName", groupIdToNameMap.getOrDefault(profile.getId(), ""));
+            result.add(map);
+        });
+
+        return ResponseEntity.ok(result);
+    }
 
 
 

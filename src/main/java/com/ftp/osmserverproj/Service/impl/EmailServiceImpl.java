@@ -1,4 +1,5 @@
-package com.ftp.osmserverproj.Service;
+package com.ftp.osmserverproj.Service.impl;
+import com.ftp.osmserverproj.Service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    @Override
+    /*@Override
     public String sendMailWithAttachment(EmailDetails details) {
         // Creating a mime message
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -72,6 +73,39 @@ public class EmailServiceImpl implements EmailService {
             // Display message when exception occurred
             return "Error while sending mail!!!";
         }
+    }*/
+
+    @Override
+    public String sendMailWithAttachment(EmailDetails details) {
+        // Creating a mime message
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper;
+
+        try {
+            // Setting multipart as true for attachments to be sent
+            mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+            mimeMessageHelper.setFrom(sender);
+            mimeMessageHelper.setTo(details.getRecipient());
+
+            // Check if message body is null before setting it
+            if (details.getMsgBody() != null) {
+                mimeMessageHelper.setText(details.getMsgBody());
+            }
+
+            mimeMessageHelper.setSubject(details.getSubject());
+
+            // Adding the attachment
+            FileSystemResource file = new FileSystemResource(new File(details.getAttachment()));
+            mimeMessageHelper.addAttachment(file.getFilename(), file);
+
+            // Sending the mail
+            javaMailSender.send(mimeMessage);
+            return "Mail sent Successfully";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error sending mail: " + e.getMessage();
+        }
     }
+
 
 }

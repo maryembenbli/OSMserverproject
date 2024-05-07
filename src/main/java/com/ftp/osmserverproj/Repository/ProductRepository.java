@@ -13,4 +13,6 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product,String> {
     List<Product> findByProductId(String productId);
     List<Product> findByNature(String nature);
+   // List<Product> getProductByCatalogueId(Long catalogueId);
+    List<Product> findByCatalogId(Long catalogueId);
 }

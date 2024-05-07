@@ -1,4 +1,5 @@
 package com.ftp.osmserverproj.dto;
+import com.ftp.osmserverproj.Model.Profil;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,8 @@ public class UserDto {
     private String email;
     @NotEmpty(message = "Password should not be empty")
     private String password;
-
+    private Profil profil;
+   // private  String titre;
 
 
 }

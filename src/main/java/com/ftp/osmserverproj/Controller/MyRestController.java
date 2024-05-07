@@ -1,12 +1,12 @@
 package com.ftp.osmserverproj.Controller;
 import com.ftp.osmserverproj.Config.GateeFile;
-import com.ftp.osmserverproj.Model.Group;
-import com.ftp.osmserverproj.Model.Product;
-import com.ftp.osmserverproj.Model.Profil;
+import com.ftp.osmserverproj.Model.*;
 import com.ftp.osmserverproj.Repository.GroupRepository;
 import com.ftp.osmserverproj.Repository.ProfileRepository;
+import com.ftp.osmserverproj.Service.GroupService;
 import com.ftp.osmserverproj.Service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -356,15 +356,43 @@ public class MyRestController {
         List<Map<String, String>> result = new ArrayList<>();
         profiles.forEach(profile -> {
             Map<String, String> map = new HashMap<>();
-            map.put("profileId", String.valueOf(profile.getId()));
-            map.put("profileTitre", profile.getTitre());
-            map.put("groupName", groupIdToNameMap.getOrDefault(profile.getId(), ""));
+            map.put("id", String.valueOf(profile.getId()));
+            map.put("titre", profile.getTitre());
+            map.put("nameg", groupIdToNameMap.getOrDefault(profile.getId(), ""));
             result.add(map);
         });
 
         return ResponseEntity.ok(result);
     }
+    @Autowired
+    private GroupService groupService;
+    @GetMapping("/group")
+    public ResponseEntity<List<Group>> getAllGroups() {
+        List<Group> groups = groupService.getAllGroups();
+        if(groups != null && !groups.isEmpty()){
+            for (Group group : groups
+            ) {
+                setGroup(group);
+            }
+        }
+        return new ResponseEntity<>(groups, HttpStatus.OK);
+    }
 
+
+    public Group setGroup(Group group) {
+        if (group.getCatalogs() != null && !group.getCatalogs().isEmpty()) {
+            for (Catalog catalog: group.getCatalogs()
+                 ){
+                catalog.setGroup(null);
+                catalog.setProducts(null);
+                catalog.setContrats(null);
+
+            }
+
+        }
+
+        return group;
+    }
 
 
 

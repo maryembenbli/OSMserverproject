@@ -1,12 +1,11 @@
 package com.ftp.osmserverproj.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Getter
 @Setter
@@ -39,5 +38,9 @@ private String name;
                     name = "role_id", referencedColumnName = "id"))
 
     private List<Role> roles= new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "profil_id")
+    private Profil profil;
+
 
 }

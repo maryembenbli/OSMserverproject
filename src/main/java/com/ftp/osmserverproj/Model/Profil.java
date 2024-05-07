@@ -1,8 +1,10 @@
 package com.ftp.osmserverproj.Model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -21,6 +23,7 @@ public class Profil {
     private Long id;
     @Column(name="titre", length = 255)
     private String titre;
+
     @ManyToMany
     @JoinTable(
             name = "profil_group",
@@ -28,5 +31,7 @@ public class Profil {
             inverseJoinColumns = @JoinColumn(name = "group_id")
     )
     private Set<Group> groups;
+@OneToMany(mappedBy = "profil", cascade = CascadeType.ALL) //, fetch = FetchType.EAGER
+private List<User> users;//List orSet
 }
 

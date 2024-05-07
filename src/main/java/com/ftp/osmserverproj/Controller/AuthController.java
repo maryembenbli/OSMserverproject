@@ -1,7 +1,6 @@
 package com.ftp.osmserverproj.Controller;
 
-import com.ftp.osmserverproj.Model.History;
-import com.ftp.osmserverproj.Model.User;
+import com.ftp.osmserverproj.Model.*;
 import com.ftp.osmserverproj.Response.LoginResponse;
 import com.ftp.osmserverproj.Service.HistoryService;
 import com.ftp.osmserverproj.Service.UserService;
@@ -35,20 +34,34 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Object> registerUser(@Valid @RequestBody UserDto userDto, BindingResult result) {
         if (result.hasErrors()) {
+            //return ResponseEntity.badRequest().body(result.getAllErrors());
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
 
         User existingUser = userService.findUserByEmail(userDto.getEmail());
         if (existingUser != null) {
+           //return ResponseEntity.status(HttpStatus.CONFLICT).body("User with the same email already exists");
             return ResponseEntity.status(HttpStatus.CONFLICT).body("User with the same email already exists");
         }
 
         userService.saveUser(userDto);
-        return ResponseEntity.ok("User registered successfully");
+        //return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.ok().body("{\"message\": \"User registered successfully\"}");
     }
    @GetMapping("/users")
    public List<UserDto> getUsers() {
-       return userService.findAllUsers();
+       List<UserDto> users = userService.findAllUsers();
+       if(users != null && !users.isEmpty()){
+           for (UserDto user:users
+                ) {
+               setUser(user);
+
+           }
+
+       }
+       return  ResponseEntity.ok(users).getBody();
+
+
    }
 
     @GetMapping("/users/search")
@@ -58,6 +71,40 @@ public class AuthController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(users);
+    }
+    /*@GetMapping("/users/searchByEmail")
+    public ResponseEntity<UserDto> searchUserByEmail(@RequestParam String email) {
+        User user = userService.findUserByEmail(email);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(user);
+    }*/
+  /*  @PostMapping("/registerWithProfil")
+    public void registerUserWithProfil(@RequestBody UserDto userDto, @RequestParam String titre) {
+        userService.saveUserWithProfil(userDto, titre);
+    }
+*/
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserDto> getUserById(@PathVariable("userId") Long userId) {
+        try {
+            UserDto userDto = userService.findUserById(userId);
+            if (userDto != null && userDto.getProfil() != null) {
+                userDto.getProfil().setUsers(null); // Set Profil's users to null to break circular reference
+            }
+            return ResponseEntity.ok(userDto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @PutMapping("/{userId}")
+    public void updateUser(@PathVariable Long userId, @RequestBody UserDto userDto) {
+        userService.updateUser(userId, userDto);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable Long userId) {
+        userService.deleteUser(userId);
     }
 
 
@@ -84,6 +131,11 @@ public class AuthController {
     @GetMapping("/history")
     public List<History> getHistory() {
         return historyService.getHistory();
+    }
+    public UserDto setUser(UserDto user) {
+        if (user.getProfil()!= null){
+            user.getProfil().setUsers(null);}
+        return user;
     }
 
 

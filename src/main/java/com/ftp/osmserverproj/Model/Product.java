@@ -1,6 +1,7 @@
 package com.ftp.osmserverproj.Model;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 //import lombok.Data;
@@ -104,9 +105,13 @@ public class Product implements Serializable {
 
     @Column(name = "CRM_BUDGET_SUBVENTION_36",nullable = true)
     private String crmBudgetSubvention36;
+    @Column(name = "catalog_Id")
+    private Long catalogId;
 
-    @ManyToMany(mappedBy = "products")
-    private Set<Group> groups;
+    @ManyToOne
+    @JoinColumn(name = "catalog_Id", referencedColumnName = "id", insertable = false, updatable = false)
+    private Catalog catalog;
+
 }
 
 

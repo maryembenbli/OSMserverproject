@@ -62,6 +62,8 @@ public class UserServiceImpl implements UserService{
     }
 
 }*/
+import com.ftp.osmserverproj.Model.Profil;
+import com.ftp.osmserverproj.Repository.ProfileRepository;
 import com.ftp.osmserverproj.Service.UserService;
 import com.ftp.osmserverproj.dto.UserDto;
 import com.ftp.osmserverproj.Model.Role;
@@ -72,38 +74,66 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
-
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+private ProfileRepository profilRepository;
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, ProfileRepository profilRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.profilRepository=profilRepository;
     }
 
+    private static final Logger logger = Logger.getLogger(UserService.class.getName());
     @Override
     public void saveUser(UserDto userDto) {
         User user = new User();
         user.setName(userDto.getFirstname() + " " + userDto.getLastname());
         user.setEmail(userDto.getEmail());
-        //encrypt the password using spring security
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        // Encrypt the password using Spring Security
+        user.setPassword(passwordEncoder.encode("Billcom"));
 
-        Role role = roleRepository.findByName("ROLE_ADMIN");
+        Role role = roleRepository.findByName("ROLE_USER");
         if (role == null) {
             role = checkRoleExist();
         }
-        user.setRoles(List.of(role));
+        Profil profil = profilRepository.findByTitre(userDto.getProfil().getTitre());
+        logger.warning("Profil : " + userDto.getProfil().getTitre());
+        if (profil == null) {
+            throw new IllegalArgumentException("Profil not found for titre: " + userDto.getProfil().getTitre());
+        }
+        user.setProfil(profil);
+
         userRepository.save(user);
     }
 
+ /*   @Override
+    public void saveUserWithProfil(UserDto userDto, String titre) {
+        User user = new User();
+        user.setName(userDto.getFirstname() + " " + userDto.getLastname());
+        user.setEmail(userDto.getEmail());
+        user.setPassword(passwordEncoder.encode("Billcom"));
+
+        Profil profil = profilRepository.findByTitre(titre);
+        if (profil == null) {
+            throw new IllegalArgumentException("Profil not found for titre: " + userDto.getProfil().getTitre());
+        }
+        user.setProfil(profil);
+
+        userRepository.save(user);
+    }*/
+
     private Role checkRoleExist() {
         Role role = new Role();
-        role.setName("ROLE_ADMIN");
+        //role.setName("ROLE_ADMIN");
+        role.setName("ROLE_USER");
+
         return roleRepository.save(role);
     }
 
@@ -125,14 +155,66 @@ public class UserServiceImpl implements UserService {
     }
     private UserDto convertEntityToDto(User user) {
         UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
         String[] name = user.getName().split(" ");
         userDto.setFirstname(name[0]);
         userDto.setLastname(name[1]);
         userDto.setEmail(user.getEmail());
+        userDto.setPassword(user.getPassword());
+        if (user.getProfil() != null) {
+            userDto.setProfil(user.getProfil());
+        }
+
         return userDto;
     }
     @Override
     public boolean isPasswordMatching(User user, String password) {
         return passwordEncoder.matches(password, user.getPassword());
     }
+    @Override
+    public void updateUser(Long userId, UserDto userDto) {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        existingUser.setName(userDto.getFirstname() + " " + userDto.getLastname());
+        existingUser.setEmail(userDto.getEmail());
+       // Profil profil = userDto.getProfil();
+        // Fetch existing Profil entity based on profileTitle
+        Profil existingProfil = profilRepository.findByTitre(userDto.getProfil().getTitre());
+
+        if (existingProfil != null) {
+            existingUser.setProfil(existingProfil);
+            userRepository.save(existingUser);
+        } else {
+            throw new IllegalArgumentException("Profil not found");
+        }
+        }
+
+
+
+    @Override
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Delete associated roles before deleting the user
+        user.getRoles().forEach(role -> {
+            role.getUsers().remove(user); // Remove user from role
+            roleRepository.save(role);    // Save the updated role
+        });
+
+        // Now delete the user
+        userRepository.deleteById(userId);
+    }
+    @Override
+    public UserDto findUserById(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            return convertEntityToDto(userOptional.get());
+        } else {
+            throw new IllegalArgumentException("User not found for ID: " + userId);
+        }
+    }
+
+
 }

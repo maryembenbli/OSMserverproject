@@ -8,6 +8,7 @@ import com.ftp.osmserverproj.dto.LoginDto;
 import com.ftp.osmserverproj.dto.UserDto;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 @RestController
 @RequestMapping("/api/user")
@@ -132,11 +134,36 @@ public class AuthController {
     public List<History> getHistory() {
         return historyService.getHistory();
     }
+
+   /* @GetMapping("/history/search")
+    public ResponseEntity<List<History>> searchHistoryByDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        List<History> historyList = historyService.searchHistoryByDate(date);
+        return ResponseEntity.ok(historyList);
+    }*/
+   @GetMapping("/history/search")
+   public ResponseEntity<List<History>> searchHistoryByDateOrStatus(
+           @RequestParam(required = false) LocalDate date,
+           @RequestParam(required = false) String status) {
+       if (date != null) {
+           // Search by date
+           List<History> historyList = historyService.searchHistoryByDate(date);
+           return ResponseEntity.ok(historyList);
+       } else if (status != null) {
+           // Search by status
+           List<History> historyList = historyService.searchHistoryByStatus(status);
+           return ResponseEntity.ok(historyList);
+       } else {
+           // Handle invalid or missing parameters
+           return ResponseEntity.badRequest().build();
+       }
+   }
     public UserDto setUser(UserDto user) {
         if (user.getProfil()!= null){
             user.getProfil().setUsers(null);}
+        user.getProfil().setGroups(null);
         return user;
     }
+
 
 
 

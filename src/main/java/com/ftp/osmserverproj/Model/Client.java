@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -26,6 +27,16 @@ public class Client {
     private String lastname;
     @Column(name="NCIN", length = 8)
     private String ncin;
+    @Column(name="gender", length = 255)
+    private String gender;
+    @Column(name="datebirth")
+    private Date datebirth;
+    @Column(name="address", length = 255)
+    private String address;
+    @Column(name="city", length = 255)
+    private String city;
+    @Column(name="region", length = 255)
+    private String region;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
 

@@ -17,4 +17,6 @@ public interface CatalogService {
     List<Catalog> getAllCatalogs();
 
     List<Catalog> getAllCatalogsWithProducts();
+    void updateCatalogStatus(Long catalogId, String status);
+    List<Catalog> findByStatus(String status);
 }

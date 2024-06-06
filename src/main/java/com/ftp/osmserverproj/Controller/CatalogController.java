@@ -8,10 +8,7 @@ import com.ftp.osmserverproj.Service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -42,6 +39,13 @@ public class CatalogController {
     @GetMapping("/withProducts")
     public ResponseEntity<List<Catalog>> getAllCatalogsWithProducts() {
         List<Catalog> catalogs = catalogService.getAllCatalogsWithProducts();
+        if(catalogs != null && !catalogs.isEmpty()){
+            for (Catalog catalog: catalogs
+            ) {
+                setCatalog(catalog);
+            }
+        }
+
         return new ResponseEntity<>(catalogs, HttpStatus.OK);
     }
 
@@ -59,7 +63,7 @@ public class CatalogController {
     @GetMapping("/{name}")
     public ResponseEntity<Catalog> getCatalogByName(@PathVariable String name) {
         Catalog catalog = catalogService.findByCatalogName(name);
-       setCatalog(catalog);
+       //setCatalog(catalog);
         if (catalog != null) {
             return new ResponseEntity<>(catalog, HttpStatus.OK);
         } else {
@@ -67,9 +71,32 @@ public class CatalogController {
         }
     }
 
+    @PutMapping("/{catalogId}/status")
+    public ResponseEntity<?> updateCatalogStatus(@PathVariable Long catalogId, @RequestParam String status) {
+        try {
+            catalogService.updateCatalogStatus(catalogId, status);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @GetMapping("/byStatus/{status}")
+    public ResponseEntity<List<Catalog>> getCatalogsByStatus(@PathVariable String status) {
+        List<Catalog> catalogs = catalogService.findByStatus(status);
+        if(catalogs != null && !catalogs.isEmpty()){
+            for (Catalog catalog: catalogs
+            ) {
+                setCatalog(catalog);
+            }
+        }
+        return new ResponseEntity<>(catalogs, HttpStatus.OK);
+    }
+
+
     public Catalog setCatalog(Catalog catalog) {
         if (catalog.getGroup() != null)
             catalog.getGroup().setCatalogs(null);
+        catalog.getGroup().setProfils(null);
 
         if (catalog.getContrats() != null && !catalog.getContrats().isEmpty()) {
 

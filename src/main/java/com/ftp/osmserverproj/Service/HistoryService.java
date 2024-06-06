@@ -4,6 +4,7 @@ import com.ftp.osmserverproj.Model.EmailDetails;
 import com.ftp.osmserverproj.Model.History;
 import com.ftp.osmserverproj.dto.UserDto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,4 +17,7 @@ public interface HistoryService {
 
     // Method to check if the subject exists in history
     boolean isSubjectUploaded(String subject);
+    List<History> searchHistoryByDate(LocalDate date);
+    List<History> searchHistoryByStatus(String status);
+
 }

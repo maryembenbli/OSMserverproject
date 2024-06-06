@@ -48,11 +48,18 @@ public class ProductController {
     @GetMapping("/searchnature")
     public ResponseEntity<List<Product>> searchProductByNature(@RequestParam String natureProduit) {
         List<Product> products = productService.getProductByNature(natureProduit);
+        if(products != null && !products.isEmpty()) {
+            for (Product product : products
+            ) {
+                setProduct(product);
+            }
+        }
         if (products.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(products);
         }
         return ResponseEntity.ok(products);
     }
+
     @GetMapping("/catalog/{catalogId}")
     public ResponseEntity<List<Product>> getProductByCatalogueId(@PathVariable Long catalogId) {
         List<Product> products = productService.getProductByCatalogueId(catalogId);

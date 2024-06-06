@@ -24,7 +24,8 @@ public class Catalog {
 
     @Column(name = "catalog_Name", nullable = false)
     private String catalogName;
-
+    @Column(name = "status", nullable = false)
+    private String status = "unprocessed";
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)
 

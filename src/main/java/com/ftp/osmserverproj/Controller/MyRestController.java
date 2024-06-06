@@ -345,7 +345,7 @@ public class MyRestController {
     @Autowired
     private GroupRepository groupRepository;
 
-    @GetMapping("/profile")
+  /*  @GetMapping("/profile")
     public ResponseEntity<?> getProfilesAndGroups() {
         List<Profil> profiles = profilRepository.findAll();
         List<Group> groups = groupRepository.findAll();
@@ -363,7 +363,35 @@ public class MyRestController {
         });
 
         return ResponseEntity.ok(result);
-    }
+    }*/
+ /* @GetMapping("/profile")
+  public ResponseEntity<?> getProfilesAndGroups() {
+      List<Profil> profiles = profilRepository.findAll();
+      List<Group> groups = groupRepository.findAll();
+
+      Map<Long, Set<String>> profileIdToGroupNamesMap = new HashMap<>();
+
+      // Populate the profileIdToGroupNamesMap
+      for (Profil profile : profiles) {
+          Set<String> groupNames = profile.getGroups().stream()
+                  .map(Group::getNameG)
+                  .collect(Collectors.toSet());
+          profileIdToGroupNamesMap.put(profile.getId(), groupNames);
+      }
+
+      List<Map<String, Object>> result = new ArrayList<>();
+      // Iterate over profiles and create the result
+      profiles.forEach(profile -> {
+          Map<String, Object> map = new HashMap<>();
+          map.put("id", profile.getId());
+          map.put("titre", profile.getTitre());
+          map.put("groups", profileIdToGroupNamesMap.getOrDefault(profile.getId(), Collections.emptySet()));
+          result.add(map);
+      });
+
+      return ResponseEntity.ok(result);
+  }
+
     @Autowired
     private GroupService groupService;
     @GetMapping("/group")
@@ -392,7 +420,7 @@ public class MyRestController {
         }
 
         return group;
-    }
+    }*/
 
 
 

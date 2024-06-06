@@ -70,11 +70,17 @@ public class ContratServiceImpl implements ContratService {
         if (existingContratWithNTEL != null) {
             throw new IllegalArgumentException("A contract with NTEL " + contrat.getNtel() + " already exists.");
         }
+
         if (contrat.getClient() != null && contrat.getClient().getId() == null) {
             Client existingClient = clientService.findClientByFirstnameLastnameAndNcin(
                     contrat.getClient().getFirstname(),
                     contrat.getClient().getLastname(),
                     contrat.getClient().getNcin());
+            contrat.getClient().getGender();
+            contrat.getClient().getAddress();
+            contrat.getClient().getDatebirth();
+            contrat.getClient().getCity();
+            contrat.getClient().getRegion();
 
             if (existingClient == null) {
                 existingClient = clientService.createClient(contrat.getClient());
@@ -99,17 +105,44 @@ public class ContratServiceImpl implements ContratService {
 
 
 
-    @Override
-    public Contrat updateContrat(Long id, Contrat newContrat) {
-        Contrat existingContrat = contratRepository.findById(id).orElse(null);
-        if (existingContrat != null) {
-            existingContrat.setNtel(newContrat.getNtel());
-            existingContrat.setClient(newContrat.getClient());
-            existingContrat.setCatalog(newContrat.getCatalog());
-            return contratRepository.save(existingContrat);
+//    @Override
+//    public Contrat updateContrat(Long id, Contrat newContrat) {
+//        Contrat existingContrat = contratRepository.findById(id).orElse(null);
+//        if (existingContrat != null) {
+//            existingContrat.setNtel(newContrat.getNtel());
+//            existingContrat.setClient(newContrat.getClient());
+//            existingContrat.setCatalog(newContrat.getCatalog());
+//            return contratRepository.save(existingContrat);
+//        }
+//        return null;
+//    }
+@Override
+public Contrat updateContrat(Long id, Contrat newContrat) {
+    Contrat existingContrat = contratRepository.findById(id).orElse(null);
+    if (existingContrat != null) {
+        existingContrat.setNtel(newContrat.getNtel());
+
+        // Update properties of the associated client
+        Client existingClient = existingContrat.getClient();
+        Client newClient = newContrat.getClient();
+        if (existingClient != null && newClient != null) {
+            // Update individual properties of the client
+            existingClient.setFirstname(newClient.getFirstname());
+            existingClient.setLastname(newClient.getLastname());
+            existingClient.setNcin(newClient.getNcin());
+            existingClient.setAddress(newClient.getAddress());
+            existingClient.setDatebirth(newClient.getDatebirth());
+            existingClient.setCity(newClient.getCity());
+            existingClient.setGender(newClient.getGender());
+            existingClient.setRegion(newClient.getRegion());
+
         }
-        return null;
+
+        existingContrat.setCatalog(newContrat.getCatalog());
+        return contratRepository.save(existingContrat);
     }
+    return null;
+}
 
     @Override
     public void deleteContrat(Long id) {

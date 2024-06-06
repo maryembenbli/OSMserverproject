@@ -93,7 +93,7 @@ public class ContratController {
             <Contrat> updateContrat(@PathVariable Long id, @RequestBody Contrat contrat) {
         Contrat updatedContrat = contratService.updateContrat(id, contrat);
         if (updatedContrat != null) {
-            return new ResponseEntity<>(updatedContrat, HttpStatus.OK);
+            return new ResponseEntity<>(setContract(updatedContrat), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -122,8 +122,10 @@ public class ContratController {
             contrat.getClient().setContrats(null);
         if (contrat.getCatalog() != null)
             contrat.getCatalog().getGroup().setCatalogs(null);
-            contrat.getCatalog().setProducts(null);
+        contrat.getCatalog().getGroup().setProfils(null);
+            contrat.getCatalog().setProducts(null); //car je besoin les produit quand laffichage de catalogue en contrat
             contrat.getCatalog().setContrats(null);
+
 
 
 

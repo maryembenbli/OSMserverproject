@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,6 +21,8 @@ public class Contrat {
     private Long id;
     @Column(name="NTEL", length = 8)
     private String ntel;
+    @Column(name="created_at")
+    private LocalDateTime createdAt;
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;

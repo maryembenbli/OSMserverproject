@@ -38,5 +38,23 @@ public class CatalogServiceImpl implements CatalogService {
         }
         return catalogs;
     }
+    @Override
+    public void updateCatalogStatus(Long catalogId, String status) {
+        Catalog catalog = catalogRepository.findById(catalogId)
+                .orElse(null);
+        if (catalog != null) {
+            catalog.setStatus(status);
+            catalogRepository.save(catalog);
+        } else {
+            throw new IllegalArgumentException("Catalog not found with ID: " + catalogId);
+        }
+    }
+    @Override
+    public List<Catalog> findByStatus(String status) {
+        return catalogRepository.findByStatus(status);
+    }
+
+
+
 
 }

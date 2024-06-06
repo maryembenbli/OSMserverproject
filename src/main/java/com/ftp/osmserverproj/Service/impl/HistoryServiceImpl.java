@@ -7,6 +7,7 @@ import com.ftp.osmserverproj.Service.HistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -51,6 +52,16 @@ public class HistoryServiceImpl implements HistoryService {
     public boolean isSubjectUploaded(String subject) {
         // Query the database to check if the subject exists in history
         return historyRepository.existsByEmailDetailsSubject(subject);
+    }
+    @Override
+    public List<History> searchHistoryByDate(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+        return historyRepository.findByCreatedAtBetween(startOfDay, endOfDay);
+    }
+    @Override
+    public List<History> searchHistoryByStatus(String status) {
+        return historyRepository.findByStatus(status);
     }
 
 }
